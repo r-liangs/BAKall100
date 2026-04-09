@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAK Practice Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#FAF6ED;--surface:#F4EFE3;--surface2:#EDE6D6;--border:#D6C9AF;
+    --accent:#8B7355;--accent-lt:rgba(139,115,85,0.11);
+    --correct:#4A6741;--correct-lt:rgba(74,103,65,0.10);
+    --wrong:#9B3A2A;--wrong-lt:rgba(155,58,42,0.09);
+    --flag:#B8741A;--flag-lt:rgba(184,116,26,0.11);
+    --text:#2C2416;--text-mid:#5C4F3A;--text-muted:#9A8A72;
+    --radius:10px;--shadow:0 2px 14px rgba(44,36,22,0.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lora',serif;min-height:100vh;padding:36px 16px 100px;background-image:radial-gradient(ellipse at 15% 8%,rgba(139,115,85,0.055) 0%,transparent 55%),radial-gradient(ellipse at 85% 92%,rgba(139,115,85,0.055) 0%,transparent 55%);}
+  header{text-align:center;margin-bottom:38px;}
+  .eyebrow{font-style:italic;font-size:13px;color:var(--accent);letter-spacing:1px;margin-bottom:10px;opacity:0.85;}
+  header h1{font-weight:700;font-size:clamp(22px,5vw,32px);color:var(--text);}
+  header p{font-style:italic;color:var(--text-muted);font-size:14px;margin-top:7px;}
+  .header-rule{width:52px;height:2px;background:var(--accent);margin:16px auto 0;border-radius:99px;opacity:0.45;}
+
+  .answer-mode-bar{max-width:740px;margin:0 auto 22px;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 18px;box-shadow:var(--shadow);}
+  .am-label{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
+  .toggle-track{position:relative;width:52px;height:28px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;cursor:pointer;flex-shrink:0;transition:background 0.25s,border-color 0.25s;}
+  .toggle-track.on{background:var(--accent);border-color:var(--accent);}
+  .toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#FAF6ED;box-shadow:0 1px 4px rgba(44,36,22,0.18);transition:transform 0.25s cubic-bezier(.4,0,.2,1);}
+  .toggle-track.on .toggle-thumb{transform:translateX(24px);}
+  .am-desc{font-style:italic;font-size:13px;color:var(--text-mid);}
+  .am-desc strong{font-style:normal;color:var(--accent);}
+
+  .mode-bar{max-width:740px;margin:0 auto 22px;display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;gap:4px;box-shadow:var(--shadow);}
+  .mode-btn{flex:1;padding:9px 6px;border:none;border-radius:9px;font-family:'Lora',serif;font-size:13px;cursor:pointer;background:transparent;color:var(--text-muted);transition:background 0.18s,color 0.18s,box-shadow 0.18s;}
+  .mode-btn.active{background:var(--bg);color:var(--accent);font-weight:600;box-shadow:0 1px 5px rgba(44,36,22,0.11);border:1px solid var(--border);}
+
+  .filter-row{max-width:740px;margin:0 auto 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .filter-lbl{font-style:italic;font-size:12px;color:var(--text-muted);}
+  select{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-family:'Lora',serif;font-size:13px;cursor:pointer;}
+  .mode-badge{margin-left:auto;font-style:italic;font-size:12px;color:var(--text-muted);}
+
+  .progress-wrap{position:sticky;top:0;z-index:100;max-width:100%;margin:0 auto 20px;padding:12px 16px;background:rgba(250,246,237,0.88);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);border-radius:0 0 14px 14px;transition:box-shadow 0.25s;}
+  .progress-wrap.scrolled{box-shadow:0 4px 16px rgba(44,36,22,0.12);}
+  .progress-inner{max-width:740px;margin:0 auto;}
+  .progress-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:8px;}
+  .progress-bar-outer{height:4px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+  .progress-bar-inner{height:100%;background:var(--accent);border-radius:99px;transition:width 0.45s cubic-bezier(.4,0,.2,1);}
+
+  .stats-row{display:flex;gap:10px;max-width:740px;margin:0 auto 22px;}
+  .stat-box{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 10px;text-align:center;box-shadow:var(--shadow);transition:transform 0.15s;}
+  .stat-box:hover{transform:translateY(-1px);}
+  .stat-box .val{font-weight:700;font-size:28px;line-height:1;}
+  .stat-box .lbl{font-style:italic;font-size:11px;color:var(--text-muted);margin-top:5px;}
+  .stat-box.correct .val{color:var(--correct);}
+  .stat-box.wrong .val{color:var(--wrong);}
+  .stat-box.flagged .val{color:var(--flag);}
+  .stat-box.remain .val{color:var(--accent);}
+  @keyframes numPop{0%{transform:scale(1)}45%{transform:scale(1.28)}100%{transform:scale(1)}}
+  .val.pop{animation:numPop 0.28s cubic-bezier(.3,1.4,.6,1) forwards;}
+
+  .controls{max-width:740px;margin:0 auto 28px;display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{font-family:'Lora',serif;font-size:13px;font-weight:600;padding:9px 20px;border-radius:8px;border:none;cursor:pointer;transition:opacity 0.15s,transform 0.12s;}
+  .btn:active{transform:scale(0.96);}
+  .btn-primary{background:var(--accent);color:#FAF6ED;}
+  .btn-ghost{background:var(--surface);color:var(--text-mid);border:1px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+
+  .card{max-width:740px;margin:0 auto 18px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);transition:border-color 0.25s,box-shadow 0.25s;animation:cardIn 0.3s cubic-bezier(.2,.8,.4,1) both;}
+  .card.flagged-card{border-color:var(--flag);box-shadow:0 2px 14px rgba(184,116,26,0.1);}
+  @keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  .card-header{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-bottom:1px solid var(--border);background:var(--surface2);}
+  .q-num{font-style:italic;font-size:11px;font-weight:500;color:var(--accent);background:var(--accent-lt);border:1px solid rgba(139,115,85,0.22);border-radius:6px;padding:3px 9px;white-space:nowrap;margin-top:2px;flex-shrink:0;}
+  .q-text{font-weight:700;font-size:15px;line-height:1.6;flex:1;}
+  .flag-btn{background:none;border:none;cursor:pointer;font-size:17px;padding:3px 5px;border-radius:6px;flex-shrink:0;opacity:0.28;margin-top:1px;line-height:1;transition:opacity 0.18s,background 0.18s,transform 0.12s;}
+  .flag-btn:hover{background:var(--flag-lt);opacity:0.85;}
+  .flag-btn.flagged{opacity:1;}
+  .flag-btn:active{transform:scale(0.80);}
+
+  .options{padding:14px 18px;display:flex;flex-direction:column;gap:8px;}
+  .opt{display:flex;align-items:flex-start;gap:13px;padding:12px 15px;border:1px solid var(--border);border-radius:9px;cursor:pointer;background:var(--bg);text-align:left;color:var(--text);font-family:'Lora',serif;font-weight:400;font-size:14px;line-height:1.55;width:100%;transition:background 0.18s ease,border-color 0.18s ease,transform 0.15s cubic-bezier(.2,.8,.4,1);}
+  .opt:hover:not(:disabled):not(.lam-selected){background:var(--accent-lt);border-color:var(--accent);transform:translateX(3px);}
+  .opt-letter{font-style:italic;font-size:12px;font-weight:600;color:var(--text-muted);background:var(--surface2);border-radius:5px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:background 0.2s,color 0.2s;}
+
+  .opt.lam-selected{background:var(--accent-lt);border-color:var(--accent);transform:translateX(0) !important;}
+  .opt.lam-selected .opt-letter{background:var(--accent);color:#FAF6ED;}
+
+  .opt.correct-ans{background:var(--correct-lt);border-color:var(--correct);transform:translateX(0) !important;animation:correctPulse 0.4s cubic-bezier(.2,.8,.4,1) forwards;}
+  @keyframes correctPulse{0%{box-shadow:0 0 0 0 rgba(74,103,65,0);transform:translateX(3px)}40%{box-shadow:0 0 0 5px rgba(74,103,65,0.15)}100%{box-shadow:0 0 0 0 rgba(74,103,65,0);transform:translateX(0)}}
+  .opt.correct-ans .opt-letter{background:var(--correct);color:#FAF6ED;animation:badgePop 0.3s 0.05s cubic-bezier(.3,1.5,.6,1) both;}
+  .opt.wrong-ans{background:var(--wrong-lt);border-color:var(--wrong);animation:wrongShake 0.38s cubic-bezier(.36,.07,.19,.97) both;}
+  @keyframes wrongShake{0%,100%{transform:translateX(0)}18%{transform:translateX(-5px)}36%{transform:translateX(4px)}54%{transform:translateX(-3px)}72%{transform:translateX(2px)}}
+  .opt.wrong-ans .opt-letter{background:var(--wrong);color:#FAF6ED;animation:badgePop 0.3s 0.05s cubic-bezier(.3,1.5,.6,1) both;}
+  .opt.revealed-correct{background:rgba(74,103,65,0.06);border-color:rgba(74,103,65,0.42);animation:revealSlide 0.32s 0.15s cubic-bezier(.2,.8,.4,1) both;}
+  @keyframes revealSlide{from{opacity:0.4;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+  .opt.revealed-correct .opt-letter{background:rgba(74,103,65,0.22);color:var(--correct);}
+  @keyframes badgePop{0%{transform:scale(0.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+  .opt:disabled{cursor:default;}
+
+  .feedback{margin:0 18px 14px;padding:10px 15px;border-radius:8px;font-style:italic;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(-4px);transition:opacity 0.22s ease,transform 0.22s ease;}
+  .feedback.show{opacity:1;transform:translateY(0);}
+  .feedback.ok{background:var(--correct-lt);color:var(--correct);border:1px solid rgba(74,103,65,0.28);}
+  .feedback.bad{background:var(--wrong-lt);color:var(--wrong);border:1px solid rgba(155,58,42,0.24);}
+
+  .lam-check-wrap{max-width:740px;margin:8px auto 32px;display:none;flex-direction:column;align-items:center;gap:12px;}
+  .lam-check-wrap.visible{display:flex;}
+  .lam-progress-note{font-style:italic;font-size:13px;color:var(--text-muted);}
+  .btn-check{font-family:'Lora',serif;font-size:15px;font-weight:700;padding:14px 40px;border-radius:10px;border:none;cursor:pointer;background:var(--correct);color:#FAF6ED;box-shadow:0 3px 14px rgba(74,103,65,0.25);transition:transform 0.12s,box-shadow 0.15s,opacity 0.15s;}
+  .btn-check:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 18px rgba(74,103,65,0.3);}
+  .btn-check:active:not(:disabled){transform:scale(0.97);}
+  .btn-check:disabled{opacity:0.4;cursor:not-allowed;}
+
+  .lam-guide{max-width:740px;margin:0 auto 32px;display:none;flex-direction:column;gap:10px;}
+  .lam-guide.visible{display:flex;}
+  .lam-guide-title{font-style:italic;font-size:12px;color:var(--text-muted);text-align:center;letter-spacing:0.5px;}
+  .lam-guide-grid{display:flex;flex-wrap:wrap;gap:7px;}
+  .lam-guide-btn{
+    font-family:'Lora',serif;font-style:italic;font-size:12px;font-weight:500;
+    padding:6px 11px;border-radius:7px;border:1px solid var(--border);
+    background:var(--surface);color:var(--text-muted);cursor:pointer;
+    transition:transform 0.12s,box-shadow 0.12s;
+    display:flex;align-items:center;gap:5px;white-space:nowrap;
+  }
+  .lam-guide-btn:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(44,36,22,0.1);}
+  .lam-guide-btn:active{transform:scale(0.95);}
+  .lam-guide-btn.gb-unanswered{border-color:var(--border);color:var(--text-muted);}
+  .lam-guide-btn.gb-selected{border-color:var(--accent);background:var(--accent-lt);color:var(--accent);}
+  .lam-guide-btn.gb-correct{border-color:var(--correct);background:var(--correct-lt);color:var(--correct);}
+  .lam-guide-btn.gb-wrong{border-color:var(--wrong);background:var(--wrong-lt);color:var(--wrong);}
+  .gb-flag{font-size:11px;line-height:1;}
+
+  #results{display:none;max-width:740px;margin:0 auto;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:48px 32px;box-shadow:var(--shadow);animation:cardIn 0.35s cubic-bezier(.2,.8,.4,1) both;}
+  #results h2{font-weight:700;font-size:26px;margin-bottom:6px;}
+  .score-big{font-weight:700;font-size:76px;line-height:1;margin:20px 0;animation:numPop 0.5s 0.1s cubic-bezier(.3,1.4,.6,1) both;}
+  .score-big.pass{color:var(--correct);}
+  .score-big.fail{color:var(--wrong);}
+  #results p{font-style:italic;color:var(--text-muted);font-size:14px;}
+
+  .empty-state{max-width:740px;margin:0 auto;text-align:center;padding:60px 24px;color:var(--text-muted);}
+  .empty-state .icon{font-size:42px;margin-bottom:14px;}
+  .empty-state h3{font-weight:700;font-size:19px;color:var(--text-mid);margin-bottom:8px;}
+  .empty-state p{font-style:italic;font-size:14px;}
+
+  @media(max-width:520px){.stats-row{flex-wrap:wrap}.stat-box{min-width:calc(50% - 5px)}.mode-btn{font-size:11.5px;padding:8px 4px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">CPL Theory · Basic Aeronautical Knowledge</div>
+  <h1>BAK Practice Questions</h1>
+  <p>40 questions — Format A (fixed answer key)</p>
+  <div class="header-rule"></div>
+</header>
+
+<div class="answer-mode-bar">
+  <span class="am-label">Answer Mode</span>
+  <div class="toggle-track on" id="lamToggle" onclick="toggleAnswerMode()">
+    <div class="toggle-thumb"></div>
+  </div>
+  <span class="am-desc" id="amDesc"><strong>LAM</strong> — select all answers, then check at the end</span>
+</div>
+
+<div class="mode-bar">
+  <button class="mode-btn active" onclick="setMode('all')">All</button>
+  <button class="mode-btn" onclick="setMode('shuffle')">Shuffled</button>
+  <button class="mode-btn" onclick="setMode('wrong')">Wrong Only</button>
+  <button class="mode-btn" onclick="setMode('flagged')">🚩 Flagged</button>
+</div>
+
+<div class="filter-row">
+  <span class="filter-lbl">Jump to</span>
+  <select id="jumpSelect" onchange="jumpTo(this.value)"><option value="">— Q# —</option></select>
+  <span class="mode-badge" id="modeLabel">All Questions</span>
+</div>
+
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-inner">
+    <div class="progress-meta">
+      <span id="progText">0 / 40 selected</span>
+      <span id="progPct">0%</span>
+    </div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-box correct"><div class="val" id="statCorrect">0</div><div class="lbl">Correct</div></div>
+  <div class="stat-box wrong">  <div class="val" id="statWrong">0</div>  <div class="lbl">Wrong</div></div>
+  <div class="stat-box flagged"><div class="val" id="statFlagged">0</div><div class="lbl">Flagged</div></div>
+  <div class="stat-box remain"> <div class="val" id="statRemain">40</div><div class="lbl">Remaining</div></div>
+</div>
+
+<div class="controls">
+  <button class="btn btn-primary" onclick="resetQuiz()">↺ Reset</button>
+  <button class="btn btn-ghost"   onclick="showResults()">📊 Results</button>
+</div>
+
+<div id="quizArea"></div>
+
+<div class="lam-check-wrap visible" id="lamCheckWrap">
+  <span class="lam-progress-note" id="lamNote">0 / 40 selected — answer all to unlock</span>
+  <button class="btn-check" id="lamCheckBtn" onclick="lamRevealAll()" disabled>Check Answers</button>
+</div>
+
+<div class="lam-guide" id="lamGuide">
+  <span class="lam-guide-title">Quick navigation — tap any question to jump</span>
+  <div class="lam-guide-grid" id="lamGuideGrid"></div>
+</div>
+
+<div id="results">
+  <div class="eyebrow" style="margin-bottom:10px">Final Score</div>
+  <h2 id="resTitle"></h2>
+  <div class="score-big" id="resPct"></div>
+  <p id="resDetail"></p>
+  <button class="btn btn-primary" onclick="resetQuiz()" style="margin-top:22px">Try Again</button>
+</div>
+
+<script>
+const RAW = [
+  {q:"Lowering of flaps:",opts:["does not affect the glide angle","allows a flatter glide at the same airspeed","increases the gliding range of the aeroplane","allows a steeper glide at the same airspeed"],ans:"d"},
+  {q:"If you use a lower grade of aviation fuel than specified, it may cause:",opts:["lower cylinder head temperatures","an increase in power capability of the engine","the fuel/air mixture to be non-uniform in the various cylinders","detonation"],ans:"d"},
+  {q:"In the event of a sudden and complete loss of engine power immediately after take-off, the Pilot\u2019s most immediate and vital concern is to:",opts:["maintain a safe flying speed","gain altitude quickly","re-start the engine","turn back and land on the runway"],ans:"a"},
+  {q:"In accordance to the CASA regulations, how soon after consuming alcohol are you legally able to fly:",opts:["12 hours","8 hours","10 hours"],ans:"b"},
+  {q:"What is the colour of 100/130 octane AVGAS:",opts:["Red","Blue","Green"],ans:"c"},
+  {q:"An aerodrome is 2000 ft. If the QNH is 1000 hPa and the OAT is \u22129\u00B0C, the density altitude is:",opts:["110 ft","\u2212670 ft","\u2212490 ft"],ans:"a"},
+  {q:"When a piston engine is running, the manifold pressure gauge records the pressure of the air:",opts:["before the throttle valve","between the throttle valve and the inlet valve","the ambient atmosphere"],ans:"b"},
+  {q:"Lowering of flaps will?",opts:["increase the maximum allowable cruise speed of the aeroplane","increase the level flight stall speed","have no effect on the level flight stall speed","decrease the level flight stall speed"],ans:"d"},
+  {q:"Which factor would tend to increase the density altitude at a given airport?",opts:["An increase in ambient temperature","A decrease in relative humidity","An increase in barometric pressure","A decrease in ambient temperature"],ans:"a"},
+  {q:"When is the magnetic compass indication most accurate in flight?",opts:["at any time during flight","only in straight-and-level unaccelerated flight","during a constant airspeed","during turns of less than 30 degrees bank"],ans:"b"},
+  {q:"In straight-and-level unaccelerated flight:",opts:["thrust is greater than drag and lift equals weight","thrust is greater than drag and weight is greater than lift","thrust equals drag and weight is greater than lift","thrust equals drag and lift equals weight"],ans:"d"},
+  {q:"You are approaching to land on RWY 29. The wind is 230 degrees magnetic at 25 knots. The expected crosswind component is:",opts:["30 knots","22 knots","19 knots","25 knots"],ans:"b"},
+  {q:"Most aircraft piston engines have dual ignition systems for the following reason:",opts:["to share the load on each spark plug in the cylinder","solely to provide safety in the event of one magneto failing","to improve combustion even though safety is not increased","for safety and to improve combustion"],ans:"d"},
+  {q:"If the engine continues to run after the ignition switch is turned to the OFF position, the most likely cause is:",opts:["too rich a mixture","a broken magneto ground wire","too lean a mixture","fouled spark plugs"],ans:"b"},
+  {q:"The initial and further effects of rudder are:",opts:["yaw followed by pitch","yaw followed by roll","roll followed by yaw","pitch followed by roll"],ans:"b"},
+  {q:"At low airspeeds:",opts:["total drag increases due to an increase in parasite drag","total drag increases due to an increase in induced drag","total drag is the same as at all other airspeeds","total drag is less than at any higher airspeed"],ans:"b"},
+  {q:"What is the meaning of RWY 21?",opts:["Runway with a magnetic heading of 210 degrees","Runway with a magnetic heading of 21 degrees","Runway with a true heading of 210 degrees"],ans:"a"},
+  {q:"The \u2018angle of attack of maximum efficiency\u2019 occurs at?",opts:["the angle of attack which gives the best Lift/Drag ratio","the angle of attack which gives the best coefficient of lift","the angle of attack which gives the minimum coefficient of lift","the stalling angle of attack"],ans:"a"},
+  {q:"The cylinder head temperature gauge usually measures:",opts:["the temperature of the hottest cylinder","the average temperature of all cylinders","the average temperature of the hottest and coldest cylinder"],ans:"a"},
+  {q:"What effect may ice or frost on the wings of an aeroplane have on its performance?",opts:["It may prevent the aeroplane from becoming airborne","It may prevent the engine from developing full power","It may cause the aeroplane to become airborne sooner than expected","No effect provided the windows are not iced up"],ans:"a"},
+  {q:"The purpose of a circuit breaker is to:",opts:["decrease the voltage from the bus bar to the selected circuit","act as a remote electrical switch for regulating voltage","protect electrical equipment from electrical overloads"],ans:"c"},
+  {q:"In the Southern Hemisphere, a linear acceleration will cause the compass to indicate a turn to the left when on a heading of:",opts:["West","North","South"],ans:"a"},
+  {q:"By what percentage is the stall speed expected to increase in a 60 degree bank turn compared to the level flight stall speed?",opts:["a slight increase","100%","none","41%"],ans:"d"},
+  {q:"Name each leg of the circuit:",opts:["Downwind, Base, Final","Upwind, Crosswind, Downwind, Base, Final","Crosswind, Downwind, Base, Final"],ans:"b"},
+  {q:"Consider the hazards of wake turbulence. Wingtip vortices behind a large aircraft in flight:",opts:["are most pronounced when the large aircraft is at low speed in a climb or approach to land","increase in intensity and violence as the speed of the large aircraft increases","are least severe when the large aircraft is at low speed after take-off in a climb and on approach to land","present no danger if the vortices are encountered in level cruising flight"],ans:"a"},
+  {q:"If the stall speed in straight and level flight is 50 knots, then in a 45 degree bank turn, the stall speed would be approximately:",opts:["70 knots","45 knots","60 knots","50 knots"],ans:"c"},
+  {q:"The coefficient of lift increases with:",opts:["an increase in angle of attack","a decrease in angle of attack","an increase in airspeed"],ans:"a"},
+  {q:"What change must be made to the aircraft controls to maintain altitude as airspeed is decreased:",opts:["the angle of attack must remain the same","the angle of attack must be increased to compensate for the decrease in lift caused by the decrease in airspeed","the angle of attack must be increased to produce more lift than weight","the angle of attack must be decreased"],ans:"b"},
+  {q:"During cruise, you notice a gradual increase in oil temperature. The engine continues to run smoothly and oil pressure remains normal. The appropriate procedure is?",opts:["fly over a small mountain range to your destination which is 25 mins away","divert to a nearby suitable aerodrome or carry out a precautionary landing in a nearby suitable field and check the oil level","declare an emergency and request assistance","pretend you didn\u2019t see the oil temp gauge"],ans:"b"},
+  {q:"In coordinated flight, for a turn with 30 degrees of bank, the faster the airspeed:",opts:["the greater the radius and the slower the rate of turn","the smaller the radius and the slower the rate of turn","the smaller the radius and the faster the rate of turn","the greater the radius and the faster the rate of turn"],ans:"a"},
+  {q:"An early indication of a loss of oil is:",opts:["a sudden drop in oil pressure and a sudden rise in oil temperature","a gradual increase in oil temperature","a gradual decrease in oil pressure","a gradual decrease in oil temperature"],ans:"b"},
+  {q:"A disadvantage of some fuel injection systems compared to a carburettor system is:",opts:["uneven fuel distribution to the cylinders","even fuel distribution to the cylinders","poor control of the fuel/air mixture","susceptibility to vapour locks and difficulty in starting in hot weather and with a hot engine"],ans:"d"},
+  {q:"The colour of 100 LL (Low Lead) fuel is:",opts:["Red","Blue","Green","Clear"],ans:"b"},
+  {q:"For a given aerofoil, the angle of attack at which it stalls?",opts:["increases as the airspeed increases","increases as the bank increases","remains the same regardless of bank, airspeed or load factor","increases as the load factor increases"],ans:"c"},
+  {q:"Under normal operating conditions, the controlled burning of the fuel/air mixture in the cylinder is initiated by a high voltage current at the spark plug:",opts:["during the exhaust stroke","during the intake stroke","late in the compression stroke, before top dead centre","mid-way through the power stroke"],ans:"c"},
+  {q:"You are approaching to land at a high altitude aerodrome in nil wind conditions. You use the same IAS as you would at a sea level aerodrome:",opts:["the ground speed will be higher at the higher aerodrome and the landing distance longer","the TAS and the landing distance would be the same at both aerodromes","the ground speed and landing distance would be the same at both aerodromes","the TAS and the landing distance would be less at the higher aerodrome"],ans:"a"},
+  {q:"The presence of carburettor ice in an aeroplane with a fixed-pitch propeller is verified if you apply carburettor heat and?",opts:["an initial increase in rpm is followed by a decrease","an initial decrease in rpm is followed by a gradual increase","a decrease in rpm occurs and then a constant rpm","an increase in rpm to a steady value occurs"],ans:"b"},
+  {q:"You are cruising at 10,000 ft altitude with a correctly leaned mixture and you then descend to cruise at 5,000 ft without altering the mixture control. The mixture will be?",opts:["correct","too lean","too rich","the same"],ans:"b"},
+  {q:"The reason for refuelling to have full tanks overnight is:",opts:["for convenience of the refuelling agent","to avoid having to do a fuel drain","to avoid air locks in the fuel lines","to minimise condensation in the fuel tanks"],ans:"d"},
+  {q:"Where can the operating limitations of an aircraft be found:",opts:["in the Aeroplane Flight Manual, approved manual material and markings thereof and placards, or any combination","only in the Aircraft or Engine logbooks","only in the Owner\u2019s Manual published by the aircraft manufacturer","on the Certificate of Airworthiness"],ans:"a"},
+];
+
+const LETTERS=['a','b','c','d','e','f','g'];
+const SAVE_KEY='bak_quiz_v1';
+let questions=[],userAnswers={};
+let wrongSet=new Set(),flagSet=new Set();
+let mode='all',isLAM=true,lamRevealed=false;
+
+function saveState(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({userAnswers,wrongSet:[...wrongSet],flagSet:[...flagSet],mode,isLAM,lamRevealed,ts:Date.now()}));}catch(e){}}
+function loadState(){try{const r=localStorage.getItem(SAVE_KEY);if(!r)return false;const s=JSON.parse(r);userAnswers=s.userAnswers||{};wrongSet=new Set(s.wrongSet||[]);flagSet=new Set(s.flagSet||[]);mode=s.mode||'all';isLAM=s.isLAM!==undefined?s.isLAM:true;lamRevealed=!!s.lamRevealed;return true;}catch(e){return false;}}
+function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function toggleAnswerMode(){
+  isLAM=!isLAM;
+  document.getElementById('lamToggle').classList.toggle('on',isLAM);
+  document.getElementById('amDesc').innerHTML=isLAM
+    ?'<strong>LAM</strong> — select all answers, then check at the end'
+    :'<strong>IAM</strong> — answers revealed instantly after each pick';
+  resetQuiz();
+}
+
+function buildQuestions(){
+  if(mode==='shuffle') questions=[...RAW].sort(()=>Math.random()-0.5);
+  else if(mode==='wrong') questions=RAW.filter((_,i)=>wrongSet.has(i));
+  else if(mode==='flagged') questions=RAW.filter((_,i)=>flagSet.has(i));
+  else questions=[...RAW];
+}
+
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',['all','shuffle','wrong','flagged'][i]===m));
+  document.getElementById('modeLabel').textContent={all:'All Questions',shuffle:'Shuffled',wrong:'Wrong Only',flagged:'🚩 Flagged'}[m];
+  userAnswers={};lamRevealed=false;buildQuestions();renderAll();updateStats();saveState();
+}
+
+function resetQuiz(){
+  wrongSet.clear();flagSet.clear();userAnswers={};lamRevealed=false;mode='all';
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.getElementById('modeLabel').textContent='All Questions';
+  document.getElementById('results').style.display='none';
+  document.getElementById('lamToggle').classList.toggle('on',isLAM);
+  document.getElementById('amDesc').innerHTML=isLAM
+    ?'<strong>LAM</strong> — select all answers, then check at the end'
+    :'<strong>IAM</strong> — answers revealed instantly after each pick';
+  buildQuestions();renderAll();updateStats();clearSave();
+}
+
+function jumpTo(val){if(!val)return;document.getElementById('q-'+val)?.scrollIntoView({behavior:'smooth',block:'start'});document.getElementById('jumpSelect').value='';}
+
+function renderAll(){
+  const area=document.getElementById('quizArea');
+  const jump=document.getElementById('jumpSelect');
+  area.innerHTML='';jump.innerHTML='<option value="">— Q# —</option>';
+  document.getElementById('lamCheckWrap').classList.toggle('visible',isLAM);
+
+  if(questions.length===0){
+    area.innerHTML=`<div class="empty-state"><div class="icon">${mode==='flagged'?'🚩':'✓'}</div><h3>${mode==='flagged'?'No flagged questions yet':'Nothing here'}</h3><p>${mode==='flagged'?'Tap the 🚩 icon on any question to flag it for review.':'You have not answered any questions incorrectly — well done.'}</p></div>`;
+    updateLAMButton();renderGuide();return;
+  }
+
+  questions.forEach((q,idx)=>{
+    const rawIdx=RAW.indexOf(q),isFlagged=flagSet.has(rawIdx);
+    jump.innerHTML+=`<option value="${idx}">Q${rawIdx+1}</option>`;
+    const card=document.createElement('div');
+    card.className='card'+(isFlagged?' flagged-card':'');
+    card.id='q-'+idx;
+    card.style.animationDelay='0ms';
+    const optsHTML=q.opts.map((opt,oi)=>{
+      const l=LETTERS[oi];
+      return`<button class="opt" id="opt-${idx}-${l}" onclick="choose(${idx},'${l}')"><span class="opt-letter">${l}</span><span>${opt}</span></button>`;
+    }).join('');
+    card.innerHTML=`<div class="card-header"><span class="q-num">Q${rawIdx+1}</span><span class="q-text">${q.q}</span><button class="flag-btn${isFlagged?' flagged':''}" id="flag-${idx}" onclick="toggleFlag(${idx})" title="${isFlagged?'Unflag':'Flag for review'}">🚩</button></div><div class="options">${optsHTML}</div><div class="feedback" id="fb-${idx}"></div>`;
+    area.appendChild(card);
+    if(userAnswers[idx]!==undefined){
+      if(isLAM&&!lamRevealed) applyLAMSelect(idx,userAnswers[idx]);
+      else applyAnswer(idx,userAnswers[idx],false);
+    }
+  });
+  updateLAMButton();renderGuide();
+}
+
+function toggleFlag(idx){
+  const rawIdx=RAW.indexOf(questions[idx]);
+  const btn=document.getElementById('flag-'+idx),card=document.getElementById('q-'+idx);
+  if(flagSet.has(rawIdx)){flagSet.delete(rawIdx);btn.classList.remove('flagged');card.classList.remove('flagged-card');btn.title='Flag for review';}
+  else{flagSet.add(rawIdx);btn.classList.add('flagged');card.classList.add('flagged-card');btn.title='Unflag';}
+  updateStats();updateGuide();saveState();
+}
+
+function choose(idx,letter){
+  if(isLAM){
+    if(lamRevealed)return;
+    userAnswers[idx]=letter;
+    applyLAMSelect(idx,letter);
+    updateStats();updateLAMButton();updateGuide();saveState();
+  }else{
+    if(userAnswers[idx]!==undefined)return;
+    userAnswers[idx]=letter;
+    const rawIdx=RAW.indexOf(questions[idx]);
+    if(letter!==questions[idx].ans) wrongSet.add(rawIdx);
+    applyAnswer(idx,letter,true);updateStats();saveState();
+  }
+}
+
+function applyLAMSelect(idx,letter){
+  const q=questions[idx];
+  q.opts.forEach((_,oi)=>{const b=document.getElementById(`opt-${idx}-${LETTERS[oi]}`);if(b)b.classList.remove('lam-selected');});
+  const btn=document.getElementById(`opt-${idx}-${letter}`);
+  if(btn)btn.classList.add('lam-selected');
+}
+
+function lamRevealAll(){
+  lamRevealed=true;wrongSet.clear();
+  questions.forEach((q,idx)=>{
+    const rawIdx=RAW.indexOf(q),letter=userAnswers[idx];
+    if(letter===undefined)return;
+    q.opts.forEach((_,oi)=>{const b=document.getElementById(`opt-${idx}-${LETTERS[oi]}`);if(b){b.classList.remove('lam-selected');b.disabled=true;}});
+    const correct=letter===q.ans;
+    if(!correct)wrongSet.add(rawIdx);
+    const cb=document.getElementById(`opt-${idx}-${letter}`);if(cb)cb.classList.add(correct?'correct-ans':'wrong-ans');
+    if(!correct){const ci=LETTERS.indexOf(q.ans);const crb=document.getElementById(`opt-${idx}-${LETTERS[ci]}`);if(crb)crb.classList.add('revealed-correct');}
+    const fb=document.getElementById('fb-'+idx);
+    if(fb){
+      const cl=q.ans.toUpperCase();
+      fb.className='feedback '+(correct?'ok':'bad');
+      fb.innerHTML=correct?'✓ Correct!':`✗ Incorrect — correct answer: <strong>${cl}</strong>`;
+      setTimeout(()=>fb.classList.add('show'),idx*55);
+    }
+  });
+  updateStats();updateLAMButton();updateGuide();saveState();
+  document.getElementById('quizArea')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function applyAnswer(idx,letter,animate){
+  const q=questions[idx];
+  const correct=letter===q.ans;
+  q.opts.forEach((_,oi)=>{const b=document.getElementById(`opt-${idx}-${LETTERS[oi]}`);if(b)b.disabled=true;});
+  const cb=document.getElementById(`opt-${idx}-${letter}`);if(cb)cb.classList.add(correct?'correct-ans':'wrong-ans');
+  if(!correct){const ci=LETTERS.indexOf(q.ans);const crb=document.getElementById(`opt-${idx}-${LETTERS[ci]}`);if(crb)crb.classList.add('revealed-correct');}
+  const fb=document.getElementById('fb-'+idx);
+  if(fb){
+    const cl=q.ans.toUpperCase();
+    fb.className='feedback '+(correct?'ok':'bad');
+    fb.innerHTML=correct?'✓ Correct!':`✗ Incorrect — correct answer: <strong>${cl}</strong>`;
+    if(animate)requestAnimationFrame(()=>requestAnimationFrame(()=>fb.classList.add('show')));
+    else fb.classList.add('show');
+  }
+}
+
+function renderGuide(){
+  const guide=document.getElementById('lamGuide');
+  const grid=document.getElementById('lamGuideGrid');
+  guide.classList.toggle('visible',isLAM);
+  if(!isLAM){grid.innerHTML='';return;}
+  grid.innerHTML='';
+  questions.forEach((q,idx)=>{
+    const rawIdx=RAW.indexOf(q);
+    const btn=document.createElement('button');
+    btn.className='lam-guide-btn';
+    btn.id='gb-'+idx;
+    btn.onclick=()=>document.getElementById('q-'+idx)?.scrollIntoView({behavior:'smooth',block:'start'});
+    grid.appendChild(btn);
+  });
+  updateGuide();
+}
+
+function updateGuide(){
+  if(!isLAM)return;
+  questions.forEach((q,idx)=>{
+    const rawIdx=RAW.indexOf(q);
+    const btn=document.getElementById('gb-'+idx);
+    if(!btn)return;
+    const isFlagged=flagSet.has(rawIdx);
+    const letter=userAnswers[idx];
+    const flagIcon=isFlagged?'<span class="gb-flag">🚩</span>':'';
+    let stateClass='gb-unanswered', stateIcon='';
+    if(lamRevealed&&letter!==undefined){
+      const correct=letter===q.ans;
+      stateClass=correct?'gb-correct':'gb-wrong';
+      stateIcon=correct?'✓':'✗';
+    } else if(letter!==undefined){
+      stateClass='gb-selected';stateIcon='·';
+    }
+    btn.className='lam-guide-btn '+stateClass;
+    btn.innerHTML=`${stateIcon?`<span>${stateIcon}</span>`:''}Q${rawIdx+1}${flagIcon}`;
+  });
+}
+
+function updateLAMButton(){
+  if(!isLAM)return;
+  const total=questions.length,answered=Object.keys(userAnswers).length;
+  const btn=document.getElementById('lamCheckBtn'),note=document.getElementById('lamNote');
+  if(lamRevealed){btn.disabled=true;btn.textContent='✓ Answers Revealed';note.textContent='Reset to try again';}
+  else if(answered>=total&&total>0){btn.disabled=false;btn.textContent='Check Answers';note.textContent=`All ${total} questions selected — ready!`;}
+  else{btn.disabled=true;btn.textContent='Check Answers';note.textContent=`${answered} / ${total} selected — answer all to unlock`;}
+}
+
+function popVal(id){const el=document.getElementById(id);if(!el)return;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');}
+
+function updateStats(){
+  const total=questions.length,answered=Object.keys(userAnswers).length;
+  let correct=0;
+  if(!isLAM||lamRevealed){Object.entries(userAnswers).forEach(([i,letter])=>{if(letter===questions[+i].ans)correct++;});}
+  const pct=total?Math.round(answered/total*100):0;
+  const nC=(!isLAM||lamRevealed)?correct:0;
+  const nW=(!isLAM||lamRevealed)?answered-correct:0;
+  const nF=flagSet.size,nR=total-answered;
+  if(document.getElementById('statCorrect').textContent!==String(nC))popVal('statCorrect');
+  if(document.getElementById('statWrong').textContent!==String(nW))popVal('statWrong');
+  if(document.getElementById('statFlagged').textContent!==String(nF))popVal('statFlagged');
+  if(document.getElementById('statRemain').textContent!==String(nR))popVal('statRemain');
+  document.getElementById('statCorrect').textContent=nC;
+  document.getElementById('statWrong').textContent=nW;
+  document.getElementById('statFlagged').textContent=nF;
+  document.getElementById('statRemain').textContent=nR;
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('progText').textContent=(isLAM&&!lamRevealed)?`${answered} / ${total} selected`:`${answered} / ${total} answered`;
+  document.getElementById('progPct').textContent=pct+'%';
+}
+
+function showResults(){
+  const total=questions.length,answered=Object.keys(userAnswers).length;
+  if(!answered){alert('Answer some questions first!');return;}
+  if(isLAM&&!lamRevealed){alert('Press "Check Answers" first to reveal your results!');return;}
+  let correct=0;
+  Object.entries(userAnswers).forEach(([i,letter])=>{if(letter===questions[+i].ans)correct++;});
+  const pct=Math.round(correct/total*100);
+  const el=document.getElementById('results');
+  el.style.display='block';el.style.animation='none';void el.offsetWidth;el.style.animation='';
+  document.getElementById('resTitle').textContent=pct>=70?'🎉 Well Done!':'Keep Studying';
+  document.getElementById('resPct').textContent=pct+'%';
+  document.getElementById('resPct').className='score-big '+(pct>=70?'pass':'fail');
+  document.getElementById('resDetail').textContent=`${correct} correct out of ${answered} answered (${total} total questions)`;
+  el.scrollIntoView({behavior:'smooth'});
+}
+
+function initQuiz(){
+  const restored=loadState();
+  if(restored&&Object.keys(userAnswers).length>0){
+    document.getElementById('lamToggle').classList.toggle('on',isLAM);
+    document.getElementById('amDesc').innerHTML=isLAM
+      ?'<strong>LAM</strong> — select all answers, then check at the end'
+      :'<strong>IAM</strong> — answers revealed instantly after each pick';
+    document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',['all','shuffle','wrong','flagged'][i]===mode));
+    document.getElementById('modeLabel').textContent={all:'All Questions',shuffle:'Shuffled',wrong:'Wrong Only',flagged:'🚩 Flagged'}[mode];
+    buildQuestions();renderAll();updateStats();
+  } else {
+    resetQuiz();
+  }
+}
+
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initQuiz);}
+else{initQuiz();}
+
+window.addEventListener('scroll',()=>{
+  document.getElementById('progressWrap').classList.toggle('scrolled',window.scrollY>80);
+},{passive:true});
+</script>
+</body>
+</html>
